@@ -18,3 +18,10 @@ button {
 button:hover {
     background-color: #0056b3;
 }
+.submit-btn {
+    background-color: #28a745; /* green */
+    color: white;
+    padding: 10px 15px;
+    border-radius: 6px;
+}
+
