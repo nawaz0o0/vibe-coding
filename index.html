@@ -4,27 +4,176 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vibe Form</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 100px;
+            background-color: #f9f9f9;
+        }
+
+        form {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 350px;
+        }
+
+        h1 {
+            color: #007BFF;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        #responseMessage {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
 </head>
 <body>
     <h1>Vibe Form</h1>
 
     <form id="userForm">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br><br>
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br><br>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
 
-        <label for="name">Full Name:</label>
-        <input type="text" id="name" name="name" required><br><br>
+        <div class="form-group">
+            <label for="name">Full Name:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
 
-        <label for="number">Phone Number:</label>
-        <input type="text" id="number" name="number" required><br><br>
+        <div class="form-group">
+            <label for="number">Phone Number:</label>
+            <input type="text" id="number" name="number" required>
+        </div>
 
-        <button type="submit">Submit</button>
+        <button type="submit" id="submitButton">Submit</button>
     </form>
 
-    <script src="script.js"></script>
+    <div id="responseMessage"></div>
+
+    <script>
+        document.getElementById("userForm").addEventListener("submit", async function(event) {
+            event.preventDefault(); // Prevent default form submission
+            
+            // Get form data
+            const formData = {
+                username: document.getElementById("username").value,
+                password: document.getElementById("password").value,
+                name: document.getElementById("name").value,
+                number: document.getElementById("number").value
+            };
+            
+            // Disable button to prevent multiple submissions
+            const submitButton = document.getElementById("submitButton");
+            submitButton.disabled = true;
+            submitButton.textContent = "Submitting...";
+            
+            try {
+                // Send data to backend
+                const response = await fetch("http://localhost:5000/submit-form", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                // Show response message
+                const responseElement = document.getElementById("responseMessage");
+                responseElement.textContent = data.message;
+                responseElement.className = data.success ? "success" : "error";
+                responseElement.style.display = "block";
+                
+                // Reset form if successful
+                if (data.success) {
+                    document.getElementById("userForm").reset();
+                }
+            } catch (error) {
+                // Show error message
+                const responseElement = document.getElementById("responseMessage");
+                responseElement.textContent = "Error connecting to server: " + error.message;
+                responseElement.className = "error";
+                responseElement.style.display = "block";
+            } finally {
+                // Re-enable button
+                submitButton.disabled = false;
+                submitButton.textContent = "Submit";
+                
+                // Hide message after 5 seconds
+                setTimeout(() => {
+                    document.getElementById("responseMessage").style.display = "none";
+                }, 5000);
+            }
+        });
+    </script>
 </body>
 </html>
